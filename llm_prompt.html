@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Large Language Models &amp; Prompt Engineering</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fafaf7;--ink:#1a1a2e;--ink-soft:#4a4a6a;--yellow:#f5e642;--blue-l:#e8f0fb;--blue:#1a5fc8;--red-l:#fceae9;--red:#c8221a;--green-l:#e6f7eb;--green:#1a8c3a;--shadow:5px 5px 0 #1a1a2e;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.8;color:var(--ink);background:#fafaf7;
+  background-image:linear-gradient(#e4eef6 1px,transparent 1px),linear-gradient(90deg,#e4eef6 1px,transparent 1px),linear-gradient(#c8d8e8 1px,transparent 1px),linear-gradient(90deg,#c8d8e8 1px,transparent 1px);
+  background-size:20px 20px,20px 20px,100px 100px,100px 100px;}
+nav{position:fixed;top:0;left:0;right:0;height:60px;background:var(--ink);display:flex;align-items:center;z-index:1000;border-bottom:3px solid var(--yellow);padding:0 2rem;}
+.nav-logo{font-family:'Fira Code',monospace;font-weight:600;color:var(--yellow);font-size:.9rem;margin-right:auto;}
+.nav-links{display:flex;list-style:none;overflow-x:auto;}
+.nav-links a{font-family:'Fira Code',monospace;font-size:.65rem;color:#a0aec0;text-decoration:none;padding:0 .85rem;height:60px;display:flex;align-items:center;border-right:1px solid #2d3748;white-space:nowrap;}
+.nav-links a:hover{color:var(--yellow);}
+.hero{margin-top:60px;padding:4rem 2rem 3rem;max-width:860px;margin-left:auto;margin-right:auto;text-align:center;}
+.lesson-card{display:inline-flex;flex-direction:column;align-items:flex-start;background:white;border:2px solid var(--ink);box-shadow:var(--shadow);padding:2rem 2.5rem;text-align:left;gap:.5rem;margin-bottom:2rem;}
+.lc-num{font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;background:var(--ink);color:var(--yellow);padding:.2rem .6rem;}
+.lc-title{font-family:'Crimson Pro',serif;font-size:1.8rem;font-weight:700;line-height:1.2;}
+.lc-sub{font-size:.9rem;color:var(--ink-soft);}
+.content{max-width:860px;margin:0 auto;padding:0 2rem 6rem;}
+.sec-wrap{display:flex;align-items:baseline;gap:1rem;margin:4rem 0 1.5rem;padding-bottom:.6rem;border-bottom:3px solid var(--ink);}
+.sec-num{font-family:'Fira Code',monospace;font-size:.72rem;font-weight:600;background:var(--ink);color:var(--yellow);padding:.25rem .7rem;white-space:nowrap;}
+.sec-wrap h2{font-family:'Crimson Pro',serif;font-size:1.7rem;font-weight:700;}
+.box{border:2px solid var(--ink);padding:1.2rem 1.4rem;margin:.8rem 0;background:white;box-shadow:3px 3px 0 var(--ink);}
+.box-label{font-family:'Fira Code',monospace;font-size:.63rem;font-weight:600;letter-spacing:.12em;margin-bottom:.3rem;}
+.box-title{font-family:'Crimson Pro',serif;font-size:1.1rem;font-weight:700;margin-bottom:.4rem;}
+.def .box-label{color:var(--blue);} .def{border-left:4px solid var(--blue);background:var(--blue-l);}
+.thm .box-label{color:var(--red);}  .thm{border-left:4px solid var(--red);background:var(--red-l);}
+.prop .box-label{color:var(--green);}.prop{border-left:4px solid var(--green);background:var(--green-l);}
+.fc{background:white;border:2px solid var(--ink);box-shadow:var(--shadow);margin:1.5rem 0;}
+.fc-hdr{background:var(--yellow);padding:.5rem 1.2rem;font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;}
+.fc-math{padding:.8rem 1.4rem;text-align:center;}
+.fc-note{padding:.1rem 1.4rem .8rem;font-size:.86rem;color:var(--ink-soft);font-style:italic;}
+.tbl{overflow-x:auto;margin:1rem 0;}
+table{width:100%;border-collapse:collapse;font-size:.9rem;}
+thead tr{background:var(--ink);color:white;}
+th,td{padding:.5rem .9rem;text-align:center;border:1px solid #ddd;}
+tbody tr:nth-child(even){background:#fdf9c4;}
+.vid{margin:1.5rem 0;}
+.vid-placeholder{background:var(--ink);color:var(--yellow);padding:1.5rem 2rem;display:flex;align-items:center;gap:1rem;font-family:'Fira Code',monospace;font-size:.78rem;}
+.ex{border:2px solid var(--ink);margin:1.5rem 0;background:white;box-shadow:var(--shadow);}
+.ex-hdr{background:var(--ink);color:white;padding:.6rem 1.2rem;display:flex;justify-content:space-between;align-items:center;font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;}
+.ex-btn{background:var(--yellow);color:var(--ink);border:none;padding:.3rem .9rem;font-family:'Fira Code',monospace;font-size:.63rem;font-weight:600;cursor:pointer;}
+.ex-body{padding:1.2rem 1.4rem;}
+.ex-prob{margin-bottom:.8rem;}
+.ex-sol{display:none;border-top:2px dashed var(--ink);margin-top:.8rem;padding-top:.8rem;}
+.ex-sol.open{display:block;}
+.sl{font-family:'Fira Code',monospace;font-size:.7rem;color:var(--ink-soft);margin:.7rem 0 .2rem;}
+p{margin-bottom:.8rem;} p:last-child{margin-bottom:0;}
+.prompt-block{background:#1a1a2e;color:#e2e8f0;font-family:'Fira Code',monospace;font-size:.78rem;padding:1rem 1.4rem;margin:.8rem 0;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);line-height:1.7;white-space:pre-wrap;overflow-x:auto;}
+.prompt-block .role{color:var(--yellow);font-weight:600;}
+.prompt-block .good{color:#68d391;}
+.prompt-block .bad{color:#fc8181;}
+.prompt-block .comment{color:#718096;font-style:italic;}
+/* QUIZ */
+.quiz{border:2px solid var(--ink);margin:2rem 0;background:white;box-shadow:var(--shadow);}
+.quiz-hdr{background:var(--ink);color:white;padding:.6rem 1.2rem;display:flex;justify-content:space-between;align-items:center;font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;}
+.qscore{background:var(--yellow);color:var(--ink);padding:.15rem .6rem;font-weight:700;}
+.quiz-body{padding:1rem 1.4rem;}
+.qq{margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid #eee;}
+.qq:last-child{border-bottom:none;}
+.qq-text{font-size:.95rem;font-weight:500;margin-bottom:.6rem;}
+.opts{display:flex;flex-direction:column;gap:.3rem;}
+.opt{display:flex;align-items:center;gap:.6rem;font-size:.9rem;cursor:pointer;padding:.35rem .5rem;border:1.5px solid transparent;border-radius:2px;transition:background .15s;}
+.opt:hover{background:#f5f5f5;}
+.opt.correct{background:var(--green-l);border-color:var(--green);}
+.opt.wrong{background:var(--red-l);border-color:var(--red);}
+.opt.show-ok{background:var(--green-l);border-color:var(--green);}
+.opt input{cursor:pointer;}
+.qfb{font-family:'Fira Code',monospace;font-size:.68rem;margin-top:.4rem;min-height:.9rem;line-height:1.5;}
+.qfb.ok{color:var(--green);}
+.qfb.err{color:var(--red);}
+.quiz-foot{padding:.8rem 1.4rem 1rem;display:flex;align-items:center;gap:1rem;border-top:1px solid #eee;}
+.q-reset{background:transparent;color:var(--ink-soft);font-family:'Fira Code',monospace;font-size:.66rem;border:1.5px solid #aaa;padding:.4rem .9rem;cursor:pointer;}
+.q-info{font-family:'Fira Code',monospace;font-size:.7rem;color:var(--ink-soft);margin-left:auto;}
+.fade{opacity:0;transform:translateY(18px);transition:opacity .45s,transform .45s;}
+.fade.vis{opacity:1;transform:none;}
+/* CURIOSITA STORICHE */
+.curiosity{border:2px solid #7c3aed;background:#f5f0ff;box-shadow:3px 3px 0 #7c3aed;padding:1.2rem 1.4rem;margin:.8rem 0;}
+.curiosity .box-label{color:#7c3aed;font-family:'Fira Code',monospace;font-size:.63rem;font-weight:600;letter-spacing:.12em;margin-bottom:.3rem;}
+.curiosity .box-title{font-family:'Crimson Pro',serif;font-size:1.1rem;font-weight:700;margin-bottom:.4rem;color:#1a1a2e;}
+.portrait{display:flex;gap:1.4rem;align-items:flex-start;margin:.8rem 0;}
+.portrait-img{width:90px;min-width:90px;height:110px;background:#1a1a2e;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Fira Code',monospace;font-size:.55rem;color:var(--yellow);text-align:center;padding:.3rem;line-height:1.4;}
+.portrait-text{flex:1;}
+/* VERO O FALSO */
+.vf{border:2px solid var(--ink);margin:2rem 0;background:white;box-shadow:var(--shadow);}
+.vf-hdr{background:#1a1a2e;color:var(--yellow);padding:.6rem 1.2rem;display:flex;justify-content:space-between;align-items:center;font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;}
+.vfscore{background:var(--yellow);color:var(--ink);padding:.15rem .6rem;font-weight:700;}
+.vf-body{padding:1rem 1.4rem;}
+.vq{margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid #eee;display:flex;flex-direction:column;gap:.4rem;}
+.vq:last-child{border-bottom:none;}
+.vq-text{font-size:.95rem;font-weight:500;}
+.vf-btns{display:flex;gap:.5rem;}
+.vf-btn{font-family:'Fira Code',monospace;font-size:.72rem;font-weight:600;padding:.3rem 1rem;border:2px solid var(--ink);background:white;cursor:pointer;transition:background .15s;}
+.vf-btn:hover{background:#f5f5f5;}
+.vf-btn.vf-vero{background:var(--green-l);border-color:var(--green);color:var(--green);}
+.vf-btn.vf-falso{background:var(--red-l);border-color:var(--red);color:var(--red);}
+.vf-btn.vf-wrong{background:var(--red-l);border-color:var(--red);}
+.vq-fb{font-family:'Fira Code',monospace;font-size:.68rem;min-height:.9rem;line-height:1.5;}
+.vq-fb.ok{color:var(--green);}
+.vq-fb.err{color:var(--red);}
+.vf-foot{padding:.8rem 1.4rem 1rem;display:flex;align-items:center;gap:1rem;border-top:1px solid #eee;}
+.vf-reset{background:transparent;color:var(--ink-soft);font-family:'Fira Code',monospace;font-size:.66rem;border:1.5px solid #aaa;padding:.4rem .9rem;cursor:pointer;}
+.vf-info{font-family:'Fira Code',monospace;font-size:.7rem;color:var(--ink-soft);margin-left:auto;}
+
+.chart-wrap{background:white;border:2px solid var(--ink);box-shadow:var(--shadow);margin:1.5rem 0;}
+.chart-title{background:#f0f0ec;border-bottom:2px solid var(--ink);padding:.45rem 1.2rem;font-family:'Fira Code',monospace;font-size:.7rem;font-weight:600;letter-spacing:.04em;color:var(--ink);}
+.chart-svg{display:block;width:100%;height:auto;padding:.4rem 0;}
+</style>
+</head>
+<body>
+<nav>
+  <span class="nav-logo">llm_prompt.html</span>
+  <ul class="nav-links">
+    <li><a href="#s01">§01 Storia</a></li>
+    <li><a href="#s02">§02 Come funziona un LLM</a></li>
+    <li><a href="#s03">§03 Prompt Engineering</a></li>
+    <li><a href="#s04">§04 Tecniche avanzate</a></li>
+    <li><a href="#s05">§05 Esempi pratici</a></li>
+    <li><a href="#s06">§06 Esercizi</a></li>
+  </ul>
+</nav>
+
+<div class="hero">
+  <div class="lesson-card">
+    <span class="lc-num">LEZIONE 01</span>
+    <div class="lc-title">Large Language Models<br>&amp; Prompt Engineering</div>
+    <div class="lc-sub">Da BERT a GPT-4 &middot; Architettura Transformer &middot; Tokenizzazione &middot; Tecniche di prompting &middot; Esempi &middot; Esercizi</div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="fade" style="margin-bottom:2rem;text-align:center;">
+  <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;max-width:660px;margin:0 auto;border:2px solid var(--ink);box-shadow:var(--shadow);">
+    <iframe style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://www.youtube.com/embed/XPoFQDdYpxU?si=S1ej4vhE3ZZc_I8M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- ═══════════════ INTRO WOW ═══════════════ -->
+<div class="fade">
+<div class="curiosity" style="border-color:#1a5fc8;background:#e8f0fb;box-shadow:3px 3px 0 #1a5fc8;">
+  <div class="box-label" style="color:#1a5fc8;">PERCHE QUESTO ARGOMENTO CONTA</div>
+  <div class="box-title">Stesso modello, stesse informazioni. Cambia solo il prompt.</div>
+  <p>Il <strong>prompt engineering</strong> e l'abilita di scrivere istruzioni che fanno la differenza tra una risposta inutile e una risposta straordinaria. Guarda questi due prompt dati allo <em>stesso identico modello</em>:</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="prompt-block"><span class="bad">// PROMPT SCARSO</span>
+<span class="role">USER:</span> Dimmi qualcosa sul clima.
+
+<span class="role">ASSISTANT:</span> Il clima e l'insieme delle condizioni
+atmosferiche medie di una regione. Varia in base
+alla latitudine, altitudine e vicinanza al mare...
+<span class="comment">→ Risposta generica da Wikipedia. Inutile.</span></div>
+</div>
+
+<div class="fade">
+<div class="prompt-block"><span class="good">// PROMPT ECCELLENTE</span>
+<span class="role">USER:</span> Sei un climatologo che parla a studenti di 16 anni.
+Spiega in 4 frasi perche le citta costiere italiane
+avranno problemi nei prossimi 30 anni a causa del
+cambiamento climatico. Fai un esempio concreto su Venezia.
+Chiudi con una domanda provocatoria per far riflettere.
+
+<span class="role">ASSISTANT:</span> Il livello del mare Mediterraneo sta salendo
+di circa 2,5 mm all'anno, e le proiezioni indicano
+un aumento di 30-60 cm entro il 2060...
+[risposta precisa, coinvolgente, con esempio su Venezia]
+<span class="comment">→ Stessa IA. Risultato completamente diverso.</span></div>
+</div>
+
+<div class="fade">
+<p style="font-size:1.05rem;font-weight:500;text-align:center;margin:1.5rem 0 2.5rem;color:var(--ink);">La differenza non e nel modello. <strong>E nel prompt.</strong> In questa lezione imparerai a padroneggiare questa abilita.</p>
+</div>
+
+<!-- ═══════════════════════════════ §01 ══════════════════════════════ -->
+<div id="s01" class="sec-wrap fade">
+  <span class="sec-num">§01</span><h2>Storia recente: da BERT ai modelli generativi</h2>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">Il paper «Attention Is All You Need» (2017)</div>
+  <div class="portrait">
+    <div class="portrait-img">VASWANI<br>et al.<br>2017<br>─────<br>Google<br>Brain</div>
+    <div class="portrait-text">
+      <p>Nel <strong>giugno 2017</strong>, Ashish Vaswani e colleghi di Google Brain pubblicarono il paper che avrebbe cambiato tutto: <em>Attention Is All You Need</em>. Proposero il <strong>Transformer</strong>, un'architettura basata interamente su meccanismi di <strong>attenzione</strong> (self-attention), eliminando le reti ricorrenti (RNN/LSTM) usate fino a quel momento per elaborare sequenze di testo. Il Transformer poteva essere parallelizzato in modo efficiente sulle GPU, rendendo possibile addestrare modelli molto piu grandi e veloci.</p>
+      <p>L'idea chiave era semplice e potente: ogni parola nel testo puo «guardare» tutte le altre parole contemporaneamente, pesando l'importanza di ciascuna attraverso punteggi di attenzione. Questo meccanismo si rivelo enormemente piu efficace delle architetture sequenziali precedenti.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Rete neurale</div>
+  <p>Programma ispirato al cervello: strati di nodi collegati che imparano a riconoscere pattern dai dati.</p>
+  <p><strong>Esempio:</strong> addestrata su foto di cani e gatti, impara a distinguerli automaticamente.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Parametro</div>
+  <p>Un numero regolabile nel modello. Piu parametri = piu relazioni complesse rappresentabili.</p>
+  <p><strong>Esempio:</strong> GPT-2 ha 1,5 miliardi di parametri — immaginali come 1,5 miliardi di «manopole» regolate durante l'addestramento.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">GPU (Graphics Processing Unit)</div>
+  <p>Processore nato per i videogiochi, perfetto per l'IA: esegue migliaia di calcoli in parallelo.</p>
+  <p><strong>Esempio:</strong> addestrare GPT-3 ha richiesto migliaia di GPU per settimane, costando milioni di dollari.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">BERT: il primo grande modello bidirezionale (2018)</div>
+  <div class="portrait">
+    <div class="portrait-img">JACOB<br>DEVLIN<br>et al.<br>─────<br>Google AI<br>2018</div>
+    <div class="portrait-text">
+      <p>Nell'<strong>ottobre 2018</strong>, Google pubblico <strong>BERT</strong> (<em>Bidirectional Encoder Representations from Transformers</em>). A differenza dei modelli precedenti che leggevano il testo solo da sinistra a destra (o viceversa), BERT leggeva in <strong>entrambe le direzioni contemporaneamente</strong> grazie alla tecnica del <strong>masked language modeling</strong>: durante l'addestramento, alcune parole venivano nascoste e il modello doveva predirle usando tutto il contesto circostante.</p>
+      <p>BERT fu un terremoto: supero lo stato dell'arte in <strong>11 benchmark</strong> di NLP contemporaneamente. Google lo integro nel motore di ricerca nel 2019, migliorando la comprensione delle query degli utenti. Fu il primo modello a dimostrare che il <strong>pre-training su larga scala</strong> seguito da <strong>fine-tuning</strong> specifico era la strada vincente.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">NLP (Natural Language Processing)</div>
+  <p>L'area dell'IA che fa «capire» e «generare» linguaggio umano ai computer: traduzione, riassunto, chatbot.</p>
+  <p><strong>Esempio:</strong> il correttore del telefono che suggerisce la parola successiva usa tecniche di NLP.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Pre-training e fine-tuning</div>
+  <p><strong>Pre-training:</strong> il modello legge miliardi di testi e impara il linguaggio in generale. <strong>Fine-tuning:</strong> viene poi specializzato su un compito specifico con dati mirati.</p>
+  <p><strong>Esempio:</strong> pre-training = imparare a leggere e scrivere a scuola. Fine-tuning = fare un corso per scrivere articoli di giornale.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Benchmark</div>
+  <p>Test standardizzato per misurare le prestazioni di un modello. Come un esame scolastico, ma per le macchine.</p>
+  <p><strong>Esempio:</strong> il benchmark MMLU ha domande su 57 materie. Se un modello ottiene l'85%, risponde correttamente a 85 su 100.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">Elon Musk, OpenAI e il grande divorzio</div>
+  <div class="portrait">
+    <div class="portrait-img">ELON<br>MUSK<br>SAM<br>ALTMAN<br>─────<br>OpenAI<br>2015</div>
+    <div class="portrait-text">
+      <p><strong>OpenAI</strong> fu fondata nel <strong>dicembre 2015</strong> come organizzazione <strong>no-profit</strong> con una missione ambiziosa: sviluppare intelligenza artificiale «sicura e benefica per l'umanita». Tra i co-fondatori c'erano <strong>Elon Musk</strong> e <strong>Sam Altman</strong>, insieme a figure come Greg Brockman, Ilya Sutskever e altri ricercatori di spicco. Musk contribui con circa <strong>100 milioni di dollari</strong> di finanziamento iniziale, e il progetto nacque esplicitamente come contrappeso al dominio di Google nell'IA.</p>
+      <p>Nel <strong>febbraio 2018</strong>, pero, Musk lascio il consiglio di amministrazione di OpenAI. Le ragioni ufficiali furono «potenziali conflitti di interesse» con Tesla (che stava sviluppando la guida autonoma), ma secondo molte ricostruzioni ci furono anche divergenze sulla direzione strategica. Negli anni successivi, OpenAI fece una svolta epocale: nel <strong>2019</strong> creo una sussidiaria <strong>for-profit</strong> («capped-profit»), accettando un investimento miliardario da <strong>Microsoft</strong>. Musk critico aspramente questa trasformazione, accusando OpenAI di aver tradito la missione originale e di essere diventata «una sussidiaria de facto di Microsoft».</p>
+      <p>La disputa degenero nel <strong>2024</strong>, quando Musk porto OpenAI in tribunale sostenendo che l'organizzazione avesse violato l'accordo fondativo di rendere la ricerca aperta e accessibile. Nel frattempo, Musk fondo <strong>xAI</strong> e lancio il proprio modello, <strong>Grok</strong>, come concorrente diretto. La vicenda OpenAI-Musk e diventata un caso emblematico del dibattito su chi debba controllare lo sviluppo dell'IA piu potente al mondo.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">GPT-2 e la scelta di non rilasciarlo (2019)</div>
+  <p><strong>OpenAI</strong> nel <strong>febbraio 2019</strong> presento <strong>GPT-2</strong>, un modello con 1,5 miliardi di parametri capace di generare testo sorprendentemente coerente. La decisione iniziale fu di <em>non rilasciare il modello completo</em> per timori legati alla disinformazione: fu il primo grande dibattito pubblico sui rischi dei modelli generativi. GPT-2 dimostro che la semplice predizione della prossima parola, applicata su scala, produceva capacita emergenti impreviste.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">GPT-3 e l'era del prompting (2020)</div>
+  <p>Nel <strong>giugno 2020</strong>, OpenAI rilascio <strong>GPT-3</strong> con <strong>175 miliardi di parametri</strong> — cento volte piu di GPT-2. La vera novita fu la scoperta del <strong>few-shot learning</strong>: senza alcun fine-tuning, bastava dare al modello pochi esempi nel prompt per fargli svolgere compiti nuovi. Nacque cosi il concetto di <strong>prompt engineering</strong>: l'arte di scrivere istruzioni efficaci per ottenere risposte accurate. GPT-3 dimostro che i modelli di linguaggio, a una scala sufficiente, potevano eseguire traduzione, riassunto, ragionamento logico e persino scrittura di codice.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">CURIOSITA STORICA</div>
+  <div class="box-title">ChatGPT, Claude e la rivoluzione mainstream (2022–2024)</div>
+  <p>Il <strong>30 novembre 2022</strong>, OpenAI lancio <strong>ChatGPT</strong>, basato su GPT-3.5 con fine-tuning tramite <strong>RLHF</strong> (Reinforcement Learning from Human Feedback). Raggiunse 100 milioni di utenti in due mesi — il prodotto con la crescita piu rapida nella storia. Nel <strong>marzo 2023</strong> arrivo <strong>GPT-4</strong>, multimodale (testo + immagini). Parallelamente, <strong>Anthropic</strong> sviluppo la famiglia <strong>Claude</strong> con un approccio incentrato sulla sicurezza (Constitutional AI), mentre <strong>Google</strong> rilascio <strong>Gemini</strong> e <strong>Meta</strong> rese open-source <strong>LLaMA</strong>. Il 2023-2024 vide anche l'esplosione dei modelli open-weight (Mistral, Qwen, DeepSeek) e il passaggio dal semplice chatbot all'uso agente dei modelli.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">RLHF (Reinforcement Learning from Human Feedback)</div>
+  <p>Tecnica per «insegnare le buone maniere» a un modello: esseri umani valutano le risposte generate e il modello impara a preferire quelle migliori.</p>
+  <p><strong>Esempio:</strong> il modello genera due risposte sulla carbonara. Un valutatore sceglie la piu chiara. Il modello impara da quella scelta.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Multimodale</div>
+  <p>Modello che elabora piu tipi di dati: testo, immagini, audio, video. Se lavora solo con testo e <em>unimodale</em>.</p>
+  <p><strong>Esempio:</strong> GPT-4 puo ricevere la foto di un frigo aperto e suggerire ricette con gli ingredienti visibili.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Open-weight / Open-source</div>
+  <p><strong>Open-weight:</strong> i pesi del modello sono scaricabili e usabili da chiunque. <strong>Open-source:</strong> include anche codice e dati di addestramento.</p>
+  <p><strong>Esempio:</strong> LLaMA di Meta e open-weight (scaricabile gratis). ChatGPT e «closed» (solo via interfaccia o API a pagamento).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">API (Application Programming Interface)</div>
+  <p>Interfaccia che permette a un programma di «parlare» con un altro programma in modo automatico, senza interfaccia grafica.</p>
+  <p><strong>Esempio:</strong> un'app di e-commerce usa l'API di un LLM per generare automaticamente le descrizioni dei prodotti.</p>
+</div>
+</div>
+
+<div class="tbl fade">
+<table>
+  <thead><tr><th>Anno</th><th>Modello</th><th>Azienda</th><th>Parametri</th><th>Novita chiave</th></tr></thead>
+  <tbody>
+    <tr><td>2017</td><td>Transformer</td><td>Google Brain</td><td>~65M</td><td>Architettura self-attention</td></tr>
+    <tr><td>2018</td><td>BERT</td><td>Google AI</td><td>340M</td><td>Pre-training bidirezionale</td></tr>
+    <tr><td>2019</td><td>GPT-2</td><td>OpenAI</td><td>1,5B</td><td>Generazione di testo coerente</td></tr>
+    <tr><td>2020</td><td>GPT-3</td><td>OpenAI</td><td>175B</td><td>Few-shot learning, prompt engineering</td></tr>
+    <tr><td>2022</td><td>ChatGPT</td><td>OpenAI</td><td>~175B</td><td>RLHF, interfaccia conversazionale</td></tr>
+    <tr><td>2023</td><td>GPT-4</td><td>OpenAI</td><td>n.d.</td><td>Multimodale (testo + immagini)</td></tr>
+    <tr><td>2023</td><td>Claude 2</td><td>Anthropic</td><td>n.d.</td><td>Constitutional AI, contesto lungo</td></tr>
+    <tr><td>2024</td><td>Gemini 1.5</td><td>Google</td><td>n.d.</td><td>Finestra di contesto 1M+ token</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — Storia dei LLM</span><span class="vfscore" id="vfs_st">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="F" data-why="Falso: BERT usa solo l'encoder del Transformer. GPT usa solo il decoder. Il Transformer originale ha entrambi.">
+      <div class="vq-text">1. BERT utilizza sia l'encoder che il decoder del Transformer.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: GPT-3 ha 175 miliardi di parametri, circa 100 volte piu di GPT-2 (1,5 miliardi).">
+      <div class="vq-text">2. GPT-3 ha circa 100 volte piu parametri di GPT-2.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: il paper 'Attention Is All You Need' fu pubblicato nel 2017, non nel 2020.">
+      <div class="vq-text">3. L'architettura Transformer fu introdotta nel 2020.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: RLHF (Reinforcement Learning from Human Feedback) e la tecnica chiave usata per allineare ChatGPT alle preferenze umane.">
+      <div class="vq-text">4. ChatGPT utilizza il Reinforcement Learning from Human Feedback (RLHF).</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: OpenAI inizialmente non rilascio il modello completo di GPT-2 per timori sulla disinformazione.">
+      <div class="vq-text">5. GPT-2 fu immediatamente rilasciato in versione completa al pubblico.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi_st"></span></div>
+</div>
+
+<!-- ═══════════════════════════════ §02 ══════════════════════════════ -->
+<div id="s02" class="sec-wrap fade">
+  <span class="sec-num">§02</span><h2>Come funziona un LLM</h2>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">DEFINIZIONE</div>
+  <div class="box-title">Large Language Model (LLM)</div>
+  <p>Un <strong>Large Language Model</strong> e una rete neurale addestrata su enormi quantita di testo per predire la prossima parola (o <em>token</em>) in una sequenza. Formalmente, dato un contesto di token precedenti, il modello calcola una distribuzione di probabilita sul vocabolario:</p>
+  <p style="text-align:center;font-family:'Fira Code',monospace;font-size:.95rem;margin:1rem 0;"><strong>P( token_successivo | token_1, token_2, ..., token_n )</strong></p>
+  <p>Il modello non «capisce» il testo nel senso umano: apprende <strong>pattern statistici</strong> dalle relazioni tra miliardi di frasi viste in addestramento.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">DEFINIZIONE</div>
+  <div class="box-title">Token e tokenizzazione</div>
+  <p>Un <strong>token</strong> e l'unita minima con cui il modello opera. Non corrisponde sempre a una parola intera: puo essere una sotto-parola, un singolo carattere o un simbolo. Ad esempio, la parola «incomprensibile» potrebbe essere spezzata in <code>[in, compren, sibile]</code>, cioe 3 token.</p>
+  <p>I modelli moderni usano algoritmi come <strong>BPE</strong> (Byte-Pair Encoding) per costruire il vocabolario. Un modello tipico ha un vocabolario di 30.000–100.000 token. In media, un token corrisponde a circa <strong>0,75 parole</strong> in inglese (leggermente meno in italiano).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">DEFINIZIONE</div>
+  <div class="box-title">Self-Attention</div>
+  <p>La <strong>self-attention</strong> e il meccanismo centrale del Transformer. Per ogni token nella sequenza, il modello calcola quanto ciascun altro token sia «rilevante» per comprenderne il significato nel contesto. Questo avviene tramite tre vettori — <strong>Query</strong>, <strong>Key</strong>, <strong>Value</strong> — calcolati per ogni token. Il punteggio di attenzione tra due token si ottiene dal prodotto scalare tra Query e Key, normalizzato e passato attraverso un softmax.</p>
+  <p>Grazie alla <strong>multi-head attention</strong>, il modello puo prestare attenzione a diversi tipi di relazioni contemporaneamente (sintattiche, semantiche, logiche).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">PROPRIETA</div>
+  <div class="box-title">Temperature e campionamento</div>
+  <p><strong>Temperature</strong> e un parametro che controlla la «creativita» del modello. Con temperature <strong>bassa</strong> (es. 0.0–0.3), il modello sceglie quasi sempre il token piu probabile: le risposte sono deterministiche e conservative. Con temperature <strong>alta</strong> (es. 0.8–1.2), la distribuzione di probabilita viene «appiattita» e token meno probabili hanno piu chance di essere scelti: le risposte sono piu varie e creative, ma anche piu imprevedibili.</p>
+  <p>Altri parametri comuni: <strong>top-p</strong> (nucleus sampling) considera solo i token la cui probabilita cumulativa raggiunge una soglia; <strong>top-k</strong> considera solo i k token piu probabili.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box thm">
+  <div class="box-label">CONCETTO CHIAVE</div>
+  <div class="box-title">Finestra di contesto</div>
+  <p>La <strong>finestra di contesto</strong> (context window) e il numero massimo di token che il modello puo «vedere» contemporaneamente. Tutto cio che sta fuori dalla finestra non esiste per il modello. I primi GPT avevano finestre di 2.048 token; GPT-4 arrivo a 128.000; Gemini 1.5 Pro a oltre 1.000.000. La lunghezza della finestra di contesto e uno dei parametri piu importanti: determina quanta informazione il modello puo usare per generare la risposta.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Encoder e Decoder</div>
+  <p>Le due meta del Transformer. L'<strong>encoder</strong> legge e «capisce» il testo. Il <strong>decoder</strong> genera testo nuovo. BERT usa solo l'encoder; GPT usa solo il decoder.</p>
+  <p><strong>Esempio:</strong> in un traduttore, l'encoder legge «il gatto dorme», il decoder genera «the cat sleeps».</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">BPE (Byte-Pair Encoding)</div>
+  <p>Algoritmo per costruire il vocabolario di un LLM: fonde coppie di simboli frequenti, creando «pezzi di parole» (subword).</p>
+  <p><strong>Esempio:</strong> «giocando» diventa <code>[gioc, ando]</code> (2 token). Parole comuni come «il» restano intere (1 token).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Allucinazione (Hallucination)</div>
+  <p>Quando un LLM genera informazioni false presentandole come vere. Non «mente»: produce il testo statisticamente piu probabile, che a volte non corrisponde alla realta.</p>
+  <p><strong>Esempio:</strong> chiedendo un fatto oscuro, il modello potrebbe inventare una data o una citazione inesistente, scrivendola con totale sicurezza.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Inferenza</div>
+  <p>Il momento in cui il modello «lavora»: riceve un prompt e genera una risposta. L'<strong>addestramento</strong> avviene una volta (costosissimo); l'<strong>inferenza</strong> avviene ogni volta che fai una domanda.</p>
+  <p><strong>Esempio:</strong> quando scrivi su ChatGPT e premi invio, il modello sta eseguendo inferenza, generando la risposta token per token.</p>
+</div>
+</div>
+
+<div class="chart-wrap fade">
+  <div class="chart-title">§02 — Evoluzione della context window (in migliaia di token)</div>
+  <svg class="chart-svg" viewBox="0 0 400 200" xmlns="http://www.w3.org/2000/svg" font-family="Fira Code,monospace" font-size="10">
+    <!-- assi -->
+    <line x1="60" y1="170" x2="380" y2="170" stroke="#aaa" stroke-width="1.5"/>
+    <line x1="60" y1="170" x2="60" y2="20" stroke="#aaa" stroke-width="1.5"/>
+    <polygon points="380,170 373,166 373,174" fill="#aaa"/>
+    <polygon points="60,20 56,27 64,27" fill="#aaa"/>
+    <!-- barre -->
+    <rect x="75" y="168" width="30" height="2" fill="#1a5fc8" opacity="0.8"/>
+    <text x="90" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">GPT-2</text>
+    <text x="90" y="163" text-anchor="middle" fill="#1a5fc8" font-size="8">2K</text>
+
+    <rect x="120" y="166" width="30" height="4" fill="#1a5fc8" opacity="0.8"/>
+    <text x="135" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">GPT-3</text>
+    <text x="135" y="161" text-anchor="middle" fill="#1a5fc8" font-size="8">4K</text>
+
+    <rect x="165" y="160" width="30" height="10" fill="#1a5fc8" opacity="0.8"/>
+    <text x="180" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">Claude 2</text>
+    <text x="180" y="155" text-anchor="middle" fill="#1a5fc8" font-size="8">100K</text>
+
+    <rect x="210" y="152" width="30" height="18" fill="#1a5fc8" opacity="0.8"/>
+    <text x="225" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">GPT-4</text>
+    <text x="225" y="147" text-anchor="middle" fill="#1a5fc8" font-size="8">128K</text>
+
+    <rect x="255" y="120" width="30" height="50" fill="#c8221a" opacity="0.8"/>
+    <text x="270" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">Claude 3</text>
+    <text x="270" y="115" text-anchor="middle" fill="#c8221a" font-size="8">200K</text>
+
+    <rect x="300" y="40" width="30" height="130" fill="#1a8c3a" opacity="0.8"/>
+    <text x="315" y="185" text-anchor="middle" fill="var(--ink)" font-size="8">Gemini</text>
+    <text x="315" y="35" text-anchor="middle" fill="#1a8c3a" font-size="8">1M+</text>
+
+    <text x="55" y="175" text-anchor="end" fill="#aaa" font-size="9">0</text>
+    <text x="385" y="175" fill="#aaa" font-size="9">→</text>
+  </svg>
+</div>
+
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — Come funziona un LLM</span><span class="vfscore" id="vfs_fn">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="V" data-why="Esatto: un LLM predice il prossimo token data una sequenza di input. E il principio fondamentale.">
+      <div class="vq-text">1. Un LLM funziona predicendo il prossimo token dato il contesto precedente.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: un token non corrisponde sempre a una parola intera. Parole lunghe o rare vengono spezzate in piu token.">
+      <div class="vq-text">2. Ogni token corrisponde esattamente a una parola.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: una temperature alta rende le risposte piu casuali e creative, non piu deterministiche.">
+      <div class="vq-text">3. Una temperature alta rende le risposte del modello piu deterministiche.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: la self-attention permette a ogni token di 'guardare' tutti gli altri token nella sequenza contemporaneamente.">
+      <div class="vq-text">4. La self-attention permette a ogni token di relazionarsi con tutti gli altri nella sequenza.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: il modello non ha accesso al testo fuori dalla finestra di contesto. Non lo 'ricorda' in modo implicito.">
+      <div class="vq-text">5. Un LLM puo sempre accedere a tutto il testo fornito, indipendentemente dalla lunghezza.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi_fn"></span></div>
+</div>
+
+<!-- ═══════════════════════════════ §03 ══════════════════════════════ -->
+<div id="s03" class="sec-wrap fade">
+  <span class="sec-num">§03</span><h2>Prompt Engineering: Fondamenti</h2>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">DEFINIZIONE</div>
+  <div class="box-title">Prompt</div>
+  <p>Un <strong>prompt</strong> e il testo di input fornito al modello per ottenere una risposta. Puo essere una domanda, un'istruzione, un contesto con esempi, o una combinazione di tutti questi elementi. La qualita del prompt e il singolo fattore che piu influenza la qualita della risposta.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">DEFINIZIONE</div>
+  <div class="box-title">Prompt Engineering</div>
+  <p>Il <strong>prompt engineering</strong> e la disciplina di progettare, ottimizzare e iterare sui prompt per ottenere risposte accurate, complete e nel formato desiderato da un LLM. Non e «magia» ne un'arte oscura: si basa su principi sistematici e replicabili.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Contesto (Context)</div>
+  <p>Tutte le informazioni che il modello ha a disposizione: prompt, cronologia della conversazione, system prompt. Piu contesto rilevante = risposta migliore.</p>
+  <p><strong>Esempio:</strong> «qual e il miglior ristorante?» (vago) vs «ristorante di pesce a Firenze, sotto 30 euro, aperto di domenica» (ricco di contesto).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Iterazione (nel prompt engineering)</div>
+  <p>Miglioramento progressivo del prompt: scrivi, leggi la risposta, correggi, riprova. I migliori prompt engineer iterano 3-10 volte.</p>
+  <p><strong>Esempio:</strong> «scrivi un'email formale» → troppo lunga → «...di massimo 5 righe» → troppo fredda → «...tono cortese ma caloroso». Ogni versione migliora.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">PRINCIPIO</div>
+  <div class="box-title">I 5 principi fondamentali del prompt engineering</div>
+  <p><strong>1. Essere specifici.</strong> Piu il prompt e dettagliato e preciso, migliore sara la risposta. Evitare ambiguita.</p>
+  <p><strong>2. Dare contesto.</strong> Fornire al modello le informazioni di sfondo necessarie per rispondere bene.</p>
+  <p><strong>3. Assegnare un ruolo.</strong> Dire al modello «chi e» (es. «Sei un esperto di marketing...») orienta il registro e le competenze.</p>
+  <p><strong>4. Specificare il formato.</strong> Indicare se si vuole una lista, un paragrafo, una tabella, un JSON, ecc.</p>
+  <p><strong>5. Iterare.</strong> Il primo prompt raramente e perfetto. Analizzare la risposta e raffinare progressivamente.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">ESEMPIO PRATICO</div>
+  <div class="box-title">Prompt vago vs. prompt specifico</div>
+  <div class="prompt-block"><span class="bad">// PROMPT VAGO — risultato imprevedibile</span>
+<span class="role">USER:</span> Parlami dell'Italia.</div>
+  <p style="margin-top:.8rem;">Questo prompt e troppo generico: il modello non sa se parlare di storia, geografia, cucina, economia. Rispondera con un riassunto superficiale e generico.</p>
+  <div class="prompt-block"><span class="good">// PROMPT SPECIFICO — risultato mirato</span>
+<span class="role">USER:</span> Sei un economista esperto di politiche europee.
+Descrivi in 3 paragrafi l'impatto del PNRR
+sull'economia italiana nel periodo 2021-2024,
+concentrandoti su digitalizzazione e transizione
+ecologica. Includi dati quantitativi se disponibili.</div>
+  <p style="margin-top:.8rem;">Questo prompt definisce: ruolo (economista), formato (3 paragrafi), argomento specifico (PNRR), periodo temporale, sotto-temi, tipo di informazione richiesta (dati quantitativi).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">ESEMPIO PRATICO</div>
+  <div class="box-title">L'importanza del formato di output</div>
+  <div class="prompt-block"><span class="good">// Specificare il formato</span>
+<span class="role">USER:</span> Elenca i 5 linguaggi di programmazione piu
+usati nel 2024. Per ciascuno indica:
+- Nome
+- Uso principale
+- Livello di difficolta (facile/medio/difficile)
+
+Rispondi in formato tabella Markdown.</div>
+  <p style="margin-top:.8rem;">Specificare il formato (tabella, lista, JSON, paragrafo) evita che il modello debba «indovinare» e produce risultati consistenti e riutilizzabili.</p>
+</div>
+</div>
+
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — Fondamenti di Prompt Engineering</span><span class="vfscore" id="vfs_pe">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="V" data-why="Esatto: piu il prompt e dettagliato e specifico, piu il modello puo produrre una risposta mirata.">
+      <div class="vq-text">1. Un prompt specifico produce generalmente risposte migliori di un prompt vago.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: il prompt engineering e una disciplina sistematica basata su principi replicabili, non su intuizione casuale.">
+      <div class="vq-text">2. Il prompt engineering e puramente intuitivo e non segue principi sistematici.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: assegnare un ruolo (es. 'sei un medico') orienta il registro, il livello di dettaglio e il tipo di linguaggio usato dal modello.">
+      <div class="vq-text">3. Assegnare un ruolo al modello nel prompt puo migliorare la qualita della risposta.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: il primo prompt raramente e perfetto. L'iterazione e uno dei principi fondamentali del prompt engineering.">
+      <div class="vq-text">4. Un buon prompt engineer trova sempre il prompt perfetto al primo tentativo.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: specificare il formato (tabella, JSON, lista, paragrafo) rende la risposta consistente e riutilizzabile.">
+      <div class="vq-text">5. Specificare il formato di output desiderato e una buona pratica di prompting.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi_pe"></span></div>
+</div>
+
+<!-- ═══════════════════════════════ §04 ══════════════════════════════ -->
+<div id="s04" class="sec-wrap fade">
+  <span class="sec-num">§04</span><h2>Tecniche avanzate di Prompting</h2>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">TECNICA</div>
+  <div class="box-title">Zero-shot, One-shot, Few-shot</div>
+  <p><strong>Zero-shot:</strong> nessun esempio fornito. Il modello deve eseguire il compito basandosi solo sull'istruzione.</p>
+  <p><strong>One-shot:</strong> un singolo esempio fornito prima della richiesta.</p>
+  <p><strong>Few-shot:</strong> piu esempi (tipicamente 2–5) forniti nel prompt. Il modello «impara» il pattern dagli esempi e lo replica.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">ESEMPIO PRATICO</div>
+  <div class="box-title">Few-shot: classificazione del sentiment</div>
+  <div class="prompt-block"><span class="good">// FEW-SHOT — fornire esempi per guidare il modello</span>
+<span class="role">USER:</span> Classifica il sentiment come POSITIVO, NEGATIVO
+o NEUTRO.
+
+Recensione: "Il cibo era eccezionale, torneremo!"
+Sentiment: POSITIVO
+
+Recensione: "Servizio lentissimo e camerieri scortesi."
+Sentiment: NEGATIVO
+
+Recensione: "Il ristorante si trova in centro."
+Sentiment: NEUTRO
+
+Recensione: "Buona la pasta ma il dolce era immangiabile."
+Sentiment:</div>
+  <p style="margin-top:.8rem;">Fornendo 3 esempi etichettati, il modello capisce sia il compito sia il formato di risposta. In questo caso, il modello rispondera probabilmente «NEGATIVO» o «MISTO», a seconda del suo giudizio sul bilanciamento.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Sentiment analysis (Analisi del sentimento)</div>
+  <p>Compito di NLP: determinare se un testo esprime un'opinione positiva, negativa o neutra. Usatissimo per analizzare recensioni e feedback.</p>
+  <p><strong>Esempio:</strong> «Telefono bellissimo, ma batteria pessima» → sentiment misto (positivo estetica, negativo batteria).</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">GLOSSARIO</div>
+  <div class="box-title">Campionamento (Sampling)</div>
+  <p>Come il modello sceglie il prossimo token. Invece di prendere sempre il piu probabile («greedy»), puo pescare in modo casuale tra i candidati, producendo risposte piu varie.</p>
+  <p><strong>Esempio:</strong> dopo «Il cielo e...», i candidati sono «blu» (40%), «sereno» (25%), «nuvoloso» (15%). Greedy sceglie sempre «blu»; con temperature alta potrebbe uscire «nuvoloso».</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">TECNICA</div>
+  <div class="box-title">Chain-of-Thought (CoT)</div>
+  <p>Il <strong>Chain-of-Thought prompting</strong> consiste nel chiedere al modello di «ragionare passo dopo passo» prima di dare la risposta finale. Questo migliora drasticamente le prestazioni su problemi di ragionamento logico, matematica e decisioni complesse. La formula magica e spesso semplice: aggiungere «Ragiona passo dopo passo» alla fine del prompt.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">ESEMPIO PRATICO</div>
+  <div class="box-title">Chain-of-Thought: risoluzione di un problema</div>
+  <div class="prompt-block"><span class="bad">// SENZA Chain-of-Thought</span>
+<span class="role">USER:</span> In un negozio ci sono 23 mele. Ne vengono
+vendute 17 al mattino e ne arrivano 6 al pomeriggio.
+Quante mele ci sono alla sera?
+<span class="comment">→ Il modello potrebbe rispondere "12" di getto,
+   sbagliando</span></div>
+  <div class="prompt-block" style="margin-top:.5rem;"><span class="good">// CON Chain-of-Thought</span>
+<span class="role">USER:</span> In un negozio ci sono 23 mele. Ne vengono
+vendute 17 al mattino e ne arrivano 6 al pomeriggio.
+Quante mele ci sono alla sera?
+Ragiona passo dopo passo.
+
+<span class="comment">→ Il modello risponde:</span>
+<span class="role">ASSISTANT:</span> Partiamo da 23 mele.
+Passo 1: Vendute 17 → 23 - 17 = 6 mele rimaste.
+Passo 2: Arrivate 6 → 6 + 6 = 12 mele.
+Risposta: 12 mele.</div>
+</div>
+</div>
+
+<div class="fade">
+<div class="box def">
+  <div class="box-label">TECNICA</div>
+  <div class="box-title">System Prompt e ruoli</div>
+  <p>Molti LLM supportano un <strong>system prompt</strong>: un'istruzione iniziale che definisce il comportamento globale del modello per tutta la conversazione. E separato dal messaggio dell'utente e ha priorita. Serve per definire il ruolo, le regole, il tono e i limiti del modello.</p>
+</div>
+</div>
+
+<div class="fade">
+<div class="curiosity">
+  <div class="box-label">ESEMPIO PRATICO</div>
+  <div class="box-title">System prompt per un assistente specializzato</div>
+  <div class="prompt-block"><span class="good">// SYSTEM PROMPT</span>
+<span class="role">SYSTEM:</span> Sei un tutor di fisica per studenti del
+liceo scientifico. Rispondi sempre in italiano.
+Usa analogie della vita quotidiana per spiegare
+i concetti. Se lo studente sbaglia, non dare
+subito la risposta corretta: fai domande guidate
+per aiutarlo a trovarla da solo. Usa un tono
+incoraggiante.
+
+<span class="role">USER:</span> Non capisco la differenza tra massa e peso.
+
+<span class="comment">→ Il modello rispondera come un tutor paziente,
+   usando analogie quotidiane</span></div>
+</div>
+</div>
+
+<div class="fade">
+<div class="box prop">
+  <div class="box-label">TECNICA</div>
+  <div class="box-title">Delimitatori e struttura</div>
+  <p>Usare <strong>delimitatori</strong> (come <code>"""</code>, <code>---</code>, <code>###</code>, <code>&lt;tag&gt;</code>) per separare sezioni diverse del prompt e evitare che il modello confonda istruzioni, contesto e input da elaborare. E particolarmente importante quando si chiede al modello di analizzare un testo fornito dall'utente.</p>
+  <div class="prompt-block"><span class="good">// Uso dei delimitatori</span>
+<span class="role">USER:</span> Riassumi il seguente testo in 2 frasi.
+
+###TESTO###
+[qui il testo da riassumere]
+###FINE TESTO###
+
+Rispondi solo con il riassunto, senza premesse.</div>
+</div>
+</div>
+
+<div class="tbl fade">
+<table>
+  <thead><tr><th>Tecnica</th><th>Quando usarla</th><th>Esempio di trigger</th></tr></thead>
+  <tbody>
+    <tr><td>Zero-shot</td><td>Compiti semplici e chiari</td><td>«Traduci in inglese: ...»</td></tr>
+    <tr><td>Few-shot</td><td>Compiti con formato specifico</td><td>«Classifica come nel modello: ...»</td></tr>
+    <tr><td>Chain-of-Thought</td><td>Ragionamento, matematica, logica</td><td>«Ragiona passo dopo passo»</td></tr>
+    <tr><td>System prompt</td><td>Definire comportamento globale</td><td>«Sei un esperto di...»</td></tr>
+    <tr><td>Delimitatori</td><td>Separare istruzioni da dati</td><td><code>###TESTO### ... ###FINE###</code></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — Tecniche di Prompting</span><span class="vfscore" id="vfs_ta">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="V" data-why="Esatto: il Chain-of-Thought chiede al modello di esplicitare il ragionamento prima della risposta finale.">
+      <div class="vq-text">1. Il Chain-of-Thought migliora le prestazioni del modello su problemi di ragionamento.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: few-shot richiede piu esempi (2-5). One-shot ne richiede uno solo.">
+      <div class="vq-text">2. Il few-shot prompting usa un solo esempio nel prompt.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: il system prompt ha priorita e definisce il comportamento globale del modello per tutta la conversazione.">
+      <div class="vq-text">3. Il system prompt definisce il comportamento del modello per l'intera conversazione.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: lo zero-shot non usa alcun esempio. E il modello a eseguire il compito basandosi solo sull'istruzione.">
+      <div class="vq-text">4. Nello zero-shot, il modello riceve almeno un esempio prima di rispondere.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: i delimitatori evitano che il modello confonda istruzioni e dati da elaborare, riducendo errori.">
+      <div class="vq-text">5. Usare delimitatori nel prompt aiuta a separare istruzioni e dati, riducendo errori.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi_ta"></span></div>
+</div>
+
+<!-- ═══════════════════════════════ §05 ══════════════════════════════ -->
+<div id="s05" class="sec-wrap fade">
+  <span class="sec-num">§05</span><h2>Esempi pratici completi</h2>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>ES 01 — Riscrivere un prompt vago</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Il seguente prompt e vago e produrra risultati mediocri. Riscrivilo applicando i 5 principi fondamentali.</p>
+      <div class="prompt-block"><span class="role">USER:</span> Scrivi qualcosa sull'intelligenza artificiale.</div>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// Applichiamo: ruolo, specificita, contesto, formato, vincoli</div>
+      <div class="prompt-block"><span class="good">// PROMPT MIGLIORATO</span>
+<span class="role">USER:</span> Sei un divulgatore scientifico che scrive per
+un blog rivolto a studenti universitari.
+Scrivi un articolo di circa 500 parole che spieghi
+come i Large Language Models stanno cambiando
+il mondo del lavoro, con focus su 3 settori:
+sanita, istruzione, diritto.
+Per ciascun settore fornisci un esempio concreto.
+Tono: accessibile ma rigoroso. No gergo tecnico
+senza spiegazione.</div>
+      <div class="sl">// Ruolo: divulgatore. Formato: articolo ~500 parole. Argomento: LLM e lavoro.</div>
+      <div class="sl">// Contesto: blog per studenti. Vincoli: 3 settori, esempi concreti, tono definito.</div>
+    </div>
+  </div>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>ES 02 — Costruire un few-shot per estrazione dati</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Vuoi estrarre nome, ruolo e azienda da descrizioni testuali. Costruisci un prompt few-shot con 2 esempi e poi applica al caso: «Laura Bianchi lavora come data analyst presso Enel dal 2021.»</p>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// Few-shot: 2 esempi + caso target</div>
+      <div class="prompt-block"><span class="good">// FEW-SHOT per estrazione entita</span>
+<span class="role">USER:</span> Estrai nome, ruolo e azienda dal testo.
+Rispondi in JSON.
+
+Testo: "Marco Rossi e il CTO di Acme Corp dal 2019."
+Output: {"nome":"Marco Rossi","ruolo":"CTO","azienda":"Acme Corp"}
+
+Testo: "Giulia Verdi guida il team marketing di Luxottica."
+Output: {"nome":"Giulia Verdi","ruolo":"marketing lead","azienda":"Luxottica"}
+
+Testo: "Laura Bianchi lavora come data analyst
+presso Enel dal 2021."
+Output:</div>
+      <div class="sl">// Il modello rispondera: {"nome":"Laura Bianchi","ruolo":"data analyst","azienda":"Enel"}</div>
+    </div>
+  </div>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>ES 03 — Chain-of-Thought per analisi critica</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Scrivi un prompt che usi il Chain-of-Thought per far valutare al modello se la seguente affermazione e corretta: «Tutti i LLM sono addestrati con RLHF.»</p>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// CoT: chiediamo ragionamento esplicito prima della conclusione</div>
+      <div class="prompt-block"><span class="good">// CHAIN-OF-THOUGHT per analisi critica</span>
+<span class="role">USER:</span> Valuta se la seguente affermazione e corretta.
+Ragiona passo dopo passo, considerando casi
+ed eccezioni, prima di dare la risposta finale.
+
+Affermazione: "Tutti i LLM sono addestrati con RLHF."
+
+<span class="comment">→ Il modello ragionera:</span>
+<span class="role">ASSISTANT:</span> Analizziamo passo dopo passo.
+1. RLHF e usato da ChatGPT e Claude, ma...
+2. Molti modelli open-source (LLaMA base, Mistral
+   base) sono rilasciati senza RLHF.
+3. BERT e i modelli encoder non usano RLHF.
+4. Esistono alternative come DPO, RLAIF, ecc.
+Conclusione: L'affermazione e FALSA.
+RLHF e una tecnica comune ma non universale.</div>
+    </div>
+  </div>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>ES 04 — System prompt per un chatbot personalizzato</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Progetta un system prompt per un chatbot che aiuti i clienti di un ristorante a scegliere piatti, considerando allergie e preferenze. Il chatbot deve essere gentile, proporre massimo 3 piatti, e chiedere sempre conferma delle allergie.</p>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// System prompt strutturato con regole chiare</div>
+      <div class="prompt-block"><span class="good">// SYSTEM PROMPT per chatbot ristorante</span>
+<span class="role">SYSTEM:</span> Sei l'assistente virtuale del ristorante
+"Bella Napoli". Il tuo compito e aiutare i clienti
+a scegliere i piatti dal menu.
+
+REGOLE:
+1. Chiedi SEMPRE se il cliente ha allergie o
+   intolleranze prima di suggerire piatti.
+2. Proponi massimo 3 piatti per volta.
+3. Per ogni piatto indica: nome, ingredienti
+   principali, prezzo.
+4. Se il cliente ha allergie, escludi i piatti
+   a rischio e segnala quelli modificabili.
+5. Tono: cordiale e professionale.
+6. Non inventare piatti non presenti nel menu.
+7. Se non sai rispondere, suggerisci di parlare
+   con il cameriere.
+
+MENU DISPONIBILE:
+[qui inserire il menu completo]</div>
+    </div>
+  </div>
+</div>
+
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — Esempi pratici</span><span class="vfscore" id="vfs_ep">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="V" data-why="Esatto: il JSON e un formato strutturato ideale per l'estrazione di dati, facilmente parsificabile da codice.">
+      <div class="vq-text">1. Chiedere output in JSON e utile per l'estrazione automatizzata di dati.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: gli esempi nel few-shot devono essere coerenti con il compito target; esempi incoerenti confondono il modello.">
+      <div class="vq-text">2. Nel few-shot, la qualita degli esempi non influisce sulla risposta.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: il system prompt e il luogo ideale per definire regole, limiti e comportamenti permanenti del chatbot.">
+      <div class="vq-text">3. Le regole di comportamento di un chatbot si definiscono tipicamente nel system prompt.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: 'Ragiona passo dopo passo' e un trigger per il Chain-of-Thought, non per il few-shot.">
+      <div class="vq-text">4. «Ragiona passo dopo passo» e la frase chiave della tecnica few-shot.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: un prompt 'scrivi qualcosa su X' e troppo generico; specificare argomento, formato, tono e vincoli e fondamentale.">
+      <div class="vq-text">5. «Scrivi qualcosa sull'IA» e un prompt inadeguato per ottenere una risposta utile.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi_ep"></span></div>
+</div>
+
+<!-- ═══════════════════════════════ §06 ══════════════════════════════ -->
+<div id="s06" class="sec-wrap fade">
+  <span class="sec-num">§06</span><h2>Esercizi</h2>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>Esercizio — Migliora questo prompt</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Il seguente prompt e inefficace. Riscrivilo usando almeno 3 dei 5 principi fondamentali.</p>
+      <div class="prompt-block"><span class="role">USER:</span> Aiutami con il mio CV.</div>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// Applichiamo: ruolo, specificita, formato, contesto</div>
+      <div class="prompt-block"><span class="good">// VERSIONE MIGLIORATA</span>
+<span class="role">USER:</span> Sei un career coach con esperienza nel settore
+tech. Ho 3 anni di esperienza come sviluppatore
+Python, sto cercando un ruolo di data engineer.
+
+Riscrivi la sezione "Esperienza lavorativa" del mio
+CV qui sotto, rendendola piu orientata ai risultati
+(usa metriche dove possibile) e adattala per il
+ruolo di data engineer.
+
+###CV ATTUALE###
+[sezione esperienza attuale]
+###FINE CV###
+
+Formato: bullet point, massimo 5 per esperienza.
+Tono: professionale, orientato ai risultati.</div>
+    </div>
+  </div>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>Esercizio — Scegli la tecnica giusta</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Per ciascuno dei seguenti compiti, indica quale tecnica di prompting e piu adatta e perche: (a) Tradurre una frase dall'italiano al francese. (b) Classificare 100 email come spam/non-spam seguendo criteri precisi. (c) Risolvere un problema di logica con piu passaggi.</p>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// (a) Traduzione semplice → zero-shot</div>
+      <p>(a) <strong>Zero-shot.</strong> La traduzione e un compito chiaro e ben definito; il modello non ha bisogno di esempi.</p>
+      <div class="sl">// (b) Classificazione con criteri → few-shot</div>
+      <p>(b) <strong>Few-shot.</strong> Servono esempi per mostrare al modello i criteri specifici di classificazione desiderati.</p>
+      <div class="sl">// (c) Problema logico multi-step → Chain-of-Thought</div>
+      <p>(c) <strong>Chain-of-Thought.</strong> Il ragionamento esplicito passo dopo passo evita errori nei passaggi intermedi.</p>
+    </div>
+  </div>
+</div>
+
+<div class="ex fade">
+  <div class="ex-hdr"><span>Esercizio — Costruisci un system prompt</span><button class="ex-btn" onclick="sol(this)">Mostra soluzione</button></div>
+  <div class="ex-body">
+    <div class="ex-prob">
+      <p>Progetta un system prompt per un assistente che aiuti studenti del liceo a prepararsi per l'esame di maturita. Deve: rispondere solo su materie scolastiche, usare un linguaggio adatto a ragazzi di 18 anni, proporre quiz di autovalutazione quando utile.</p>
+    </div>
+    <div class="ex-sol">
+      <div class="sl">// System prompt con regole, limiti e stile</div>
+      <div class="prompt-block"><span class="good">// SYSTEM PROMPT — tutor maturita</span>
+<span class="role">SYSTEM:</span> Sei un tutor virtuale per studenti del
+liceo che si preparano all'esame di maturita.
+
+COMPORTAMENTO:
+1. Rispondi SOLO su argomenti scolastici pertinenti
+   alla maturita (italiano, storia, matematica,
+   fisica, lingue, filosofia, scienze).
+2. Se lo studente chiede qualcosa fuori tema,
+   rifiuta gentilmente e riporta il focus sullo studio.
+3. Linguaggio: chiaro, diretto, adatto a ragazzi
+   di 18 anni. Evita toni accademici pesanti.
+4. Dopo ogni spiegazione di 3+ paragrafi, proponi
+   un breve quiz (2-3 domande) per verificare
+   la comprensione.
+5. Se lo studente sbaglia, non dare subito la
+   risposta: poni domande guidate.
+6. Incoraggia sempre lo studente.
+
+FORMATO RISPOSTE:
+- Spiegazioni: paragrafi brevi con esempi.
+- Quiz: domande numerate con 4 opzioni (A/B/C/D).</div>
+    </div>
+  </div>
+</div>
+
+<!-- VERO O FALSO RIEPILOGO FINALE -->
+<div class="vf fade">
+  <div class="vf-hdr"><span>VERO O FALSO — RIEPILOGO FINALE</span><span class="vfscore" id="vfs01">0/5</span></div>
+  <div class="vf-body">
+    <div class="vq" data-ok="F" data-why="Falso: BERT e un modello encoder (bidirezionale), GPT e un modello decoder (autoregressivo). Hanno architetture diverse.">
+      <div class="vq-text">1. BERT e GPT hanno la stessa architettura.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: il prompt engineering si basa su principi sistematici (specificita, contesto, ruolo, formato, iterazione).">
+      <div class="vq-text">2. Il prompt engineering segue principi sistematici e replicabili.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: un LLM predice il token piu probabile. Non 'capisce' nel senso umano: rileva pattern statistici.">
+      <div class="vq-text">3. I Large Language Models comprendono il significato del testo come un essere umano.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="V" data-why="Esatto: il few-shot fu la grande scoperta di GPT-3 nel 2020: senza fine-tuning, bastava dare pochi esempi nel prompt.">
+      <div class="vq-text">4. La tecnica few-shot fu resa celebre da GPT-3 nel 2020.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+    <div class="vq" data-ok="F" data-why="Falso: piu parametri non garantiscono prestazioni migliori. Contano anche dati, architettura, fine-tuning, qualita del training.">
+      <div class="vq-text">5. Un modello con piu parametri e sempre migliore di uno con meno parametri.</div>
+      <div class="vf-btns"><button class="vf-btn" onclick="vfAns(this,'V')">Vero</button><button class="vf-btn" onclick="vfAns(this,'F')">Falso</button></div><div class="vq-fb"></div>
+    </div>
+  </div>
+  <div class="vf-foot"><button class="vf-reset" onclick="resetVF(this)">Ricomincia</button><span class="vf-info" id="vfi01"></span></div>
+</div>
+
+<!-- QUIZ UNICO -->
+<div class="quiz fade">
+  <div class="quiz-hdr"><span>QUIZ FINALE</span><span class="qscore" id="sc01">0/5</span></div>
+  <div class="quiz-body">
+    <div class="qq" data-ok="c" data-why="BERT usa solo l'encoder. GPT usa solo il decoder. Il Transformer originale ha entrambi.">
+      <div class="qq-text">1. BERT utilizza quale parte del Transformer?</div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q01a"> Solo il decoder</label>
+        <label class="opt"><input type="radio" name="q01a"> Encoder e decoder</label>
+        <label class="opt"><input type="radio" name="q01a"> Solo l'encoder</label>
+        <label class="opt"><input type="radio" name="q01a"> Nessuno dei due</label>
+      </div><div class="qfb"></div>
+    </div>
+    <div class="qq" data-ok="b" data-why="Il Chain-of-Thought chiede al modello di ragionare passo dopo passo prima della risposta finale.">
+      <div class="qq-text">2. Quale tecnica migliora il ragionamento matematico?</div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q01b"> Few-shot</label>
+        <label class="opt"><input type="radio" name="q01b"> Chain-of-Thought</label>
+        <label class="opt"><input type="radio" name="q01b"> Zero-shot</label>
+        <label class="opt"><input type="radio" name="q01b"> System prompt</label>
+      </div><div class="qfb"></div>
+    </div>
+    <div class="qq" data-ok="d" data-why="GPT-3 (2020) dimostro il few-shot learning: pochi esempi nel prompt bastavano per compiti nuovi senza fine-tuning.">
+      <div class="qq-text">3. Quale modello rese celebre il concetto di few-shot learning?</div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q01c"> BERT</label>
+        <label class="opt"><input type="radio" name="q01c"> GPT-2</label>
+        <label class="opt"><input type="radio" name="q01c"> ChatGPT</label>
+        <label class="opt"><input type="radio" name="q01c"> GPT-3</label>
+      </div><div class="qfb"></div>
+    </div>
+    <div class="qq" data-ok="a" data-why="La temperature controlla la casualita: bassa = deterministico, alta = creativo e imprevedibile.">
+      <div class="qq-text">4. Cosa controlla il parametro «temperature»?</div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q01d"> La casualita/creativita delle risposte</label>
+        <label class="opt"><input type="radio" name="q01d"> La velocita di generazione</label>
+        <label class="opt"><input type="radio" name="q01d"> Il numero di parametri usati</label>
+        <label class="opt"><input type="radio" name="q01d"> La lunghezza massima della risposta</label>
+      </div><div class="qfb"></div>
+    </div>
+    <div class="qq" data-ok="c" data-why="'Attention Is All You Need' fu pubblicato nel 2017 dal team di Google Brain, introducendo il Transformer.">
+      <div class="qq-text">5. In che anno fu pubblicato «Attention Is All You Need»?</div>
+      <div class="opts">
+        <label class="opt"><input type="radio" name="q01e"> 2015</label>
+        <label class="opt"><input type="radio" name="q01e"> 2019</label>
+        <label class="opt"><input type="radio" name="q01e"> 2017</label>
+        <label class="opt"><input type="radio" name="q01e"> 2020</label>
+      </div><div class="qfb"></div>
+    </div>
+  </div>
+  <div class="quiz-foot"><button class="q-reset" onclick="resetQ(this)">Ricomincia</button><span class="q-info" id="info01"></span></div>
+</div>
+
+<div class="fade" style="margin-top:4rem;padding:1.2rem 1.4rem;border:2px solid #aaa;background:#f9f9f6;font-size:.82rem;color:var(--ink-soft);line-height:1.7;">
+  <div style="font-family:'Fira Code',monospace;font-size:.63rem;font-weight:600;letter-spacing:.12em;margin-bottom:.4rem;color:#aaa;">DISCLAIMER</div>
+  <p>Questo materiale e stato elaborato e distribuito a titolo integrativo e gratuito dal docente, a supporto della didattica curricolare. Non costituisce adozione ufficiale ne sostituisce i testi in adozione. Le informazioni su modelli e aziende sono aggiornate a marzo 2025; il settore evolve rapidamente e alcuni dettagli potrebbero non essere piu attuali. Il docente declina ogni responsabilita per eventuali imprecisioni. La riproduzione parziale e consentita per uso didattico non commerciale con citazione della fonte.</p>
+</div>
+
+</div><!-- /content -->
+
+<script>
+// ── SOLUZIONI ────────────────────────────────────────────────────────
+function sol(btn) {
+  var s = btn.closest('.ex').querySelector('.ex-sol');
+  var open = s.classList.toggle('open');
+  btn.textContent = open ? 'Nascondi' : 'Mostra soluzione';
+}
+
+// ── QUIZ: risposta immediata al click ────────────────────────────────
+document.addEventListener('change', function(e) {
+  var inp = e.target;
+  if (!inp || inp.type !== 'radio') return;
+  var qq = inp.closest('.qq');
+  if (!qq) return;
+
+  var letters = ['a','b','c','d'];
+  var opts = qq.querySelectorAll('.opt');
+  var correct = qq.dataset.ok;
+
+  var selected = -1;
+  opts.forEach(function(o,i){ if(o.querySelector('input') === inp) selected = i; });
+  var selectedLetter = letters[selected];
+
+  opts.forEach(function(o){ o.classList.remove('correct','wrong','show-ok'); });
+
+  var fb = qq.querySelector('.qfb');
+  if (selectedLetter === correct) {
+    opts[selected].classList.add('correct');
+    fb.textContent = '// corretto';
+    fb.className = 'qfb ok';
+  } else {
+    opts[selected].classList.add('wrong');
+    var why = qq.dataset.why || '';
+    fb.innerHTML = '// sbagliato' + (why ? ' &nbsp;—&nbsp; ' + why : '');
+    fb.className = 'qfb err';
+    var okIdx = letters.indexOf(correct);
+    if (okIdx >= 0) opts[okIdx].classList.add('show-ok');
+  }
+
+  var quiz = qq.closest('.quiz');
+  var allQQ = quiz.querySelectorAll('.qq');
+  var score = 0;
+  allQQ.forEach(function(q){
+    var inps = q.querySelectorAll('input[type=radio]');
+    var ok = q.dataset.ok;
+    inps.forEach(function(r,i){ if(r.checked && letters[i]===ok) score++; });
+  });
+  var scId = quiz.querySelector('.qscore').id;
+  document.getElementById(scId).textContent = score + '/5';
+
+  var infoId = scId.replace('sc','info');
+  var infoEl = document.getElementById(infoId);
+  var answered = 0;
+  allQQ.forEach(function(q){ if(q.querySelector('input:checked')) answered++; });
+  if (answered === 5) {
+    if (score===5) infoEl.textContent = '// perfetto!';
+    else if (score>=3) infoEl.textContent = '// ' + score + '/5 — ripassare qualcosa';
+    else infoEl.textContent = '// ' + score + '/5 — ripassare la sezione';
+  }
+});
+
+// ── RESET QUIZ ───────────────────────────────────────────────────────
+function resetQ(btn) {
+  var quiz = btn.closest('.quiz');
+  quiz.querySelectorAll('input[type=radio]').forEach(function(r){ r.checked=false; });
+  quiz.querySelectorAll('.opt').forEach(function(o){ o.classList.remove('correct','wrong','show-ok'); });
+  quiz.querySelectorAll('.qfb').forEach(function(f){ f.textContent=''; f.className='qfb'; });
+  var scEl = quiz.querySelector('.qscore');
+  scEl.textContent = '0/5';
+  var infoId = scEl.id.replace('sc','info');
+  document.getElementById(infoId).textContent = '';
+}
+
+// ── VERO O FALSO ─────────────────────────────────────────────────────
+function vfAns(btn, chosen) {
+  var vq = btn.closest('.vq');
+  if (vq.dataset.answered) return;
+  vq.dataset.answered = '1';
+  var correct = vq.dataset.ok;
+  var btns = vq.querySelectorAll('.vf-btn');
+  var fb = vq.querySelector('.vq-fb');
+  var why = vq.dataset.why || '';
+  btns.forEach(function(b) { b.disabled = true; });
+  if (chosen === correct) {
+    btn.classList.add(chosen === 'V' ? 'vf-vero' : 'vf-falso');
+    fb.textContent = '// corretto' + (why ? ' — ' + why : '');
+    fb.className = 'vq-fb ok';
+  } else {
+    btn.classList.add('vf-wrong');
+    btns.forEach(function(b) {
+      if ((b.textContent.trim() === 'Vero' && correct === 'V') ||
+          (b.textContent.trim() === 'Falso' && correct === 'F')) {
+        b.classList.add(correct === 'V' ? 'vf-vero' : 'vf-falso');
+      }
+    });
+    fb.textContent = '// sbagliato' + (why ? ' — ' + why : '');
+    fb.className = 'vq-fb err';
+  }
+  var vf = vq.closest('.vf');
+  var allVq = vf.querySelectorAll('.vq');
+  var score = 0;
+  allVq.forEach(function(q) {
+    if (q.dataset.answered) {
+      var ans = q.querySelector('.vf-btn.vf-vero, .vf-btn.vf-falso');
+      if (ans && ((ans.textContent.trim()==='Vero' && q.dataset.ok==='V') ||
+                  (ans.textContent.trim()==='Falso' && q.dataset.ok==='F'))) score++;
+    }
+  });
+  var scEl = vf.querySelector('.vfscore');
+  scEl.textContent = score + '/' + allVq.length;
+  var answered = vf.querySelectorAll('.vq[data-answered]').length;
+  if (answered === allVq.length) {
+    var infoId = scEl.id.replace('vfs', 'vfi');
+    var infoEl = document.getElementById(infoId);
+    if (score === allVq.length) infoEl.textContent = '// perfetto!';
+    else if (score >= allVq.length * 0.6) infoEl.textContent = '// ' + score + '/' + allVq.length + ' — quasi!';
+    else infoEl.textContent = '// ' + score + '/' + allVq.length + ' — ripassare';
+  }
+}
+
+function resetVF(btn) {
+  var vf = btn.closest('.vf');
+  vf.querySelectorAll('.vq').forEach(function(q) {
+    delete q.dataset.answered;
+    q.querySelectorAll('.vf-btn').forEach(function(b) {
+      b.disabled = false;
+      b.classList.remove('vf-vero','vf-falso','vf-wrong');
+    });
+    var fb = q.querySelector('.vq-fb');
+    fb.textContent = ''; fb.className = 'vq-fb';
+  });
+  vf.querySelector('.vfscore').textContent = '0/' + vf.querySelectorAll('.vq').length;
+  var scId = vf.querySelector('.vfscore').id;
+  var infoId = scId.replace('vfs','vfi');
+  document.getElementById(infoId).textContent = '';
+}
+
+// ── FADE-IN ──────────────────────────────────────────────────────────
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('vis'); obs.unobserve(e.target); }});
+}, {threshold:0.07});
+document.querySelectorAll('.fade').forEach(function(el){ obs.observe(el); });
+</script>
+</body>
+</html>
